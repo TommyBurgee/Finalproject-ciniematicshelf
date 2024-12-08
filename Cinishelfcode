@@ -1,0 +1,63 @@
+const int butPin = 7;
+const int ledPinb = 2;
+const int ledPing = 3;
+const int motorPin = 5;
+const int potPin = 3;
+
+boolean ledState = false; 
+boolean lastButState = false;
+
+void setup() {
+  pinMode(ledPinb, OUTPUT);      // Blue LED
+  pinMode(ledPing, OUTPUT);      // Green LED
+  pinMode(motorPin, OUTPUT);     
+  pinMode(butPin, INPUT_PULLUP); 
+  Serial.begin(9600);
+
+  digitalWrite(ledPinb, LOW);
+  digitalWrite(ledPing, LOW);
+  analogWrite(motorPin, 0);     
+}
+
+void loop() {
+  toggleLEDs();         
+  controlMotor();       
+}
+
+void toggleLEDs() {
+  boolean butState = digitalRead(butPin);
+
+  if (butState != lastButState) { 
+    delay(100);                   
+    butState = digitalRead(butPin);
+
+    if (butState == LOW && lastButState == HIGH) { // Button pressed
+      ledState = !ledState; 
+
+      if (ledState) {
+        digitalWrite(ledPinb, HIGH);  
+        digitalWrite(ledPing, HIGH); 
+        Serial.println("LEDs ON");
+      } else {
+        digitalWrite(ledPinb, LOW);  
+        digitalWrite(ledPing, LOW); 
+        Serial.println("LEDs OFF");
+      }
+    }
+  }
+  lastButState = butState;
+}
+
+void controlMotor() {
+  int sensorValue = analogRead(potPin);       
+  int motorSpeed = map(sensorValue, 0, 1023, 0, 255); // Map to PWM range
+  
+  if (motorSpeed > 1) { 
+    analogWrite(motorPin, motorSpeed);           
+    Serial.print("Motor Speed: ");
+    Serial.println(motorSpeed);
+  } else {
+    analogWrite(motorPin, 0);                   
+    Serial.println("Motor OFF");
+  }
+}
